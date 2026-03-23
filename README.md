@@ -1,5 +1,12 @@
 # The Mood Machine
 
+
+TF SUMMARY:
+The core concept students needed to understand for this assignment is how a rule based classifier operates and behaves differently compared to a machine learning classifer. Student should pick up how logic they write shapes predictions with rule based classifers and how datasets influence both rule based and ML systems. Where students are most likely to struggle are on edge cases and deciding how to handle them, this includes sarcasm or slang, where hardcoded key words are used to imply different meaning. AI is helpful with coming up with new test cases as well as adjustments to make for rules to catch different contexts. AI can be misleading by suggesting some overengineered solutions. One way I would provide guidance to students is to ensure students are tracing a single test case failure from end to end and encouraging them to not rework their code too much, rather attempt as small of changes as possible.  
+
+
+
+OVERVIEW:
 The Mood Machine is a simple text classifier that begins with a rule based approach and can optionally be extended with a small machine learning model. It tries to guess whether a short piece of text sounds **positive**, **negative**, **neutral**, or even **mixed** based on patterns in your data.
 
 This lab gives you hands on experience with how basic systems work, where they break, and how different modeling choices affect fairness and accuracy. You will edit code, add data, run experiments, and write a short model card reflection.
