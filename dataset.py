@@ -17,6 +17,7 @@ POSITIVE_WORDS = [
     "great",
     "good",
     "love",
+    "hopeful",
     "excited",
     "awesome",
     "fun",
@@ -50,6 +51,14 @@ SAMPLE_POSTS = [
     "This is fine",
     "So excited for the weekend",
     "I am not happy about this",
+    "No cap, this is actually pretty good",
+    "Lowkey stressed but highkey proud of myself",
+    "I absolutely love getting stuck in traffic",
+    "I can't decide if I'm happy or sad about this news",
+    "This movie was so bad it was actually hilarious 😂", 
+    "I have no strong feelings one way or the other about this", 
+    "I'm so tired but also kind of excited for tomorrow's event", 
+    "Just got a promotion at work, but now I have to deal with more stress 😩",
 ]
 
 # Human labels for each post above.
@@ -65,6 +74,14 @@ TRUE_LABELS = [
     "neutral",   # "This is fine"
     "positive",  # "So excited for the weekend"
     "negative",  # "I am not happy about this"
+    "positive",  # "No cap, this is actually pretty good"
+    "mixed",     # "Lowkey stressed but highkey proud of myself"
+    "negative",  # "I absolutely love getting stuck in traffic"
+    "mixed",     # "I can't decide if I'm happy or sad about this news"
+    "positive",  # "This movie was so bad it was actually hilarious 😂"
+    "neutral",   # "I have no strong feelings one way or the other about this"
+    "mixed",     # "I'm so tired but also kind of excited for tomorrow's event"
+    "mixed",     # "Just got a promotion at work, but now I have to deal with more stress 😩"
 ]
 
 # TODO: Add 5-10 more posts and labels.
