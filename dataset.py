@@ -64,6 +64,13 @@ SAMPLE_POSTS = [
     "I can't believe I just spilled coffee on my laptop, but at least it wasn't my phone",
     "Feeling a mix of excitement and dread about the upcoming family reunion",
     "I love how the weather is perfect for a walk, but I also hate that it means I have to leave my cozy bed",
+    "Oh great, another Monday at work",
+    "Yeah right, like that's ever going to happen",
+    "Thanks a lot for ruining my whole weekend",
+    "Just great, my laptop crashed right before the deadline",
+    "Wow, I absolutely love waiting in line for two hours",
+    "Can't wait to spend my entire weekend doing taxes",
+    "What could go wrong scheduling a meeting at 5pm on a Friday",
 ]
 
 # Human labels for each post above.
@@ -92,6 +99,13 @@ TRUE_LABELS = [
     "mixed",  # "I can't believe I just spilled coffee on my laptop, but at least it wasn't my phone"
     "mixed",     # "Feeling a mix of excitement and dread about the upcoming family reunion"
     "mixed",     # "I love how the weather is perfect for a walk, but I also hate that it means I have to leave
+    "negative",  # "Oh great, another Monday at work"
+    "negative",  # "Yeah right, like that's ever going to happen"
+    "negative",  # "Thanks a lot for ruining my whole weekend"
+    "negative",  # "Just great, my laptop crashed right before the deadline"
+    "negative",  # "Wow, I absolutely love waiting in line for two hours"
+    "negative",  # "Can't wait to spend my entire weekend doing taxes"
+    "negative",  # "What could go wrong scheduling a meeting at 5pm on a Friday"
 ]
 
 # TODO: Add 5-10 more posts and labels.

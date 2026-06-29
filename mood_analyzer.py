@@ -51,6 +51,19 @@ class MoodAnalyzer:
           "hate": -2, "awful": -2, "terrible": -2, "horrible": -2, "worst": -2,
         }
 
+        # High-confidence sarcasm phrases. These read as positive on the
+        # surface but are almost always sarcastic, so matching one pushes the
+        # score firmly negative regardless of the individual word weights.
+        # Stored as token tuples so they match the output of preprocess()
+        # (which lowercases and keeps contractions like "can't" intact).
+        self.sarcasm_markers: List[Tuple[str, ...]] = [
+          ("yeah", "right"),
+          ("just", "great"),
+          ("thanks", "a", "lot"),
+          ("love", "that", "for", "me"),
+          ("what", "could", "go", "wrong")
+        ]
+
     # ---------------------------------------------------------------------
     # Preprocessing
     # ---------------------------------------------------------------------
@@ -117,6 +130,21 @@ class MoodAnalyzer:
           return -1
         return 0
 
+    def _count_sarcasm_markers(self, tokens: List[str]) -> int:
+        """
+        Return how many high-confidence sarcasm phrases appear in ``tokens``.
+
+        Each phrase is matched as a contiguous n-gram against the token list.
+        """
+        matches = 0
+        for marker in self.sarcasm_markers:
+          window = len(marker)
+          for start in range(len(tokens) - window + 1):
+            if tuple(tokens[start:start + window]) == marker:
+              matches += 1
+              break  # count each distinct marker at most once
+        return matches
+
     def score_text(self, text: str) -> int:
         """
         Compute a numeric "mood score" for the given text.
@@ -163,6 +191,11 @@ class MoodAnalyzer:
 
           score += self._token_weight(token)
           index += 1
+
+        # Lexical sarcasm markers: phrases that are almost always sarcastic.
+        # Each match applies a firm penalty, enough to flip a typical
+        # surface-positive post ("oh great, just what I needed") negative.
+        score -= 3 * self._count_sarcasm_markers(tokens)
 
         # Lightweight sarcasm heuristic (dataset-focused):
         # positive language + clearly frustrating phrase -> reduce score.

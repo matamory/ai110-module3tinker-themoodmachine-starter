@@ -16,17 +16,17 @@ I primarily used the rule based model in `mood_analyzer.py`. I did not tune the 
 Classify short informal text posts into `positive`, `negative`, `neutral`, or `mixed` mood labels.
 
 **How it works (brief):**  
-The rule based model tokenizes text, assigns +1 to positive words and -1 to negative words, applies a negation rule (for example `not happy`), and then maps the final score to a label. It also includes a small sarcasm heuristic for `stuck in traffic` when positive wording appears.
+The rule based model tokenizes text, assigns weighted scores to sentiment words, emojis, and slang (strong terms count more), applies a negation rule (for example `not happy`), and then maps the final score to a label. It also flags a small list of high-confidence sarcasm phrases (for example `oh great`, `yeah right`, `thanks a lot`).
 
 
 
 ## 2. Data
 
 **Dataset description:**  
-`SAMPLE_POSTS` currently has 14 posts. I extended the starter set by adding 3 examples:
+`SAMPLE_POSTS` currently has 26 posts. I extended the starter set with neutral, mixed, and several obvious sarcasm examples, for example:
 - `I have no strong feelings one way or the other about this` (`neutral`)
-- `I'm so tired but also kind of excited for tomorrow's event` (`mixed`)
 - `Just got a promotion at work, but now I have to deal with more stress 😩` (`mixed`)
+- `Oh great, another Monday at work` (`negative`, sarcasm)
 
 **Labeling process:**  
 Labels were assigned by dominant or balanced sentiment signals:
@@ -42,7 +42,7 @@ Hard/ambiguous cases included sarcasm (`I absolutely love getting stuck in traff
 - Includes mixed-feeling statements
 
 **Possible issues with the dataset:**  
-- Small dataset size (14 total examples)
+- Small dataset size (26 total examples)
 - Some labels are subjective (`mixed` vs `neutral`)
 - Limited coverage of slang variants and emoji meanings
 - No dedicated train/validation/test split for robust generalization estimates
@@ -50,10 +50,10 @@ Hard/ambiguous cases included sarcasm (`I absolutely love getting stuck in traff
 ## 3. How the Rule Based Model Works (if used)
 
 **Your scoring rules:**  
-- **Preprocessing:** lowercase, punctuation filtering via regex tokenization, keep contractions/emoticons/selected emojis as tokens.
-- **Base score:** +1 for tokens in `POSITIVE_WORDS`, -1 for tokens in `NEGATIVE_WORDS`.
-- **Negation enhancement:** if a negation token (for example `not`, `never`, `can't`) appears immediately before a sentiment word, flip that word's contribution.
-- **Sarcasm enhancement:** if positive wording appears with `stuck in traffic` / `in traffic`, apply an extra negative penalty.
+- **Preprocessing:** lowercase, punctuation filtering via regex tokenization, normalize stretched words (`soooo` -> `soo`), keep contractions/emoticons/selected emojis as tokens.
+- **Base score:** weighted per token — default +/-1 for lexicon words, larger weights for intense words and emoji/slang signals (for example `hate` = -2, `😍` = +2).
+- **Negation enhancement:** if a negation token (for example `not`, `never`, `can't`) appears immediately before a sentiment word, flip that word's weighted contribution.
+- **Sarcasm enhancement:** matching a high-confidence sarcasm phrase (for example `oh great`, `yeah right`) applies a firm negative penalty; a `stuck in traffic` contrast rule remains for positive wording.
 - **Label mapping:** score > 0 => `positive`, score < 0 => `negative`, score == 0 => `mixed` only if both positive and negative lexicon hits exist, otherwise `neutral`.
 - **Lexicon tuning:** added `hopeful` to `POSITIVE_WORDS` to fix a repeated mixed-sentiment miss.
 
@@ -87,16 +87,16 @@ Potential strengths: learns correlations automatically without hand-writing rule
 **How you evaluated the model:**  
 I evaluated the rule based model using `evaluate_rule_based(SAMPLE_POSTS, TRUE_LABELS)` in `main.py`.
 
-Observed rule based accuracy: **0.79** on the current 14-post labeled dataset.
+Observed rule based accuracy: **0.69** on the current 26-post labeled dataset.
 
 **Examples of correct predictions:**  
 - `I am not happy about this` -> predicted `negative` (negation + positive word flips correctly)
+- `Oh great, another Monday at work` -> predicted `negative` (sarcasm phrase marker)
 - `I can't decide if I'm happy or sad about this news` -> predicted `mixed` (balanced positive + negative cues)
-- `I absolutely love getting stuck in traffic` -> predicted `negative` (sarcasm heuristic catches traffic frustration phrase)
 
 **Examples of incorrect predictions:**  
 - `Lowkey stressed but highkey proud of myself` -> predicted `negative`, true `mixed` (captures `stressed` but misses positive cue `proud`)
-- `This movie was so bad it was actually hilarious 😂` -> predicted `negative`, true `positive` (literal `bad` dominates; humor/emoji inversion not modeled)
+- `Wow, I absolutely love waiting in line for two hours` -> predicted `positive`, true `negative` (positive word + negative situation; contrast sarcasm not modeled)
 - `Just got a promotion at work, but now I have to deal with more stress 😩` -> predicted `neutral`, true `mixed` (positive event `promotion` not in lexicon; `stress` may not match `stressed`)
 
 These three are the sentences that consistently confused the model in current evaluation.
