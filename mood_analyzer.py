@@ -33,6 +33,24 @@ class MoodAnalyzer:
         self.positive_words = set(w.lower() for w in positive_words)
         self.negative_words = set(w.lower() for w in negative_words)
 
+        # Per-token sentiment weights. Anything listed here overrides the
+        # default +/-1 contribution, letting strong signals count for more.
+        # Emojis and slang are included so they act as sentiment on their own,
+        # even if they aren't in the positive/negative word lists.
+        self.token_weights: Dict[str, int] = {
+          # Strong positive emojis / emoticons
+          "😂": 2, "🤣": 2, "😊": 2, "😍": 2, "👍": 2,
+          ":)": 1, ":-)": 1, ";)": 1,
+          # Strong negative emojis / emoticons
+          "😢": -2, "😭": -2, "😡": -2, "👎": -2, "🥲": -1, "💀": -1,
+          ":(": -1, ":-(": -1,
+          # Slang signals
+          "lol": 1, "lmao": 2, "yay": 2, "ugh": -1, "meh": -1, "wtf": -2,
+          # Intense words weigh more than mild ones
+          "love": 2, "amazing": 2, "awesome": 2, "best": 2, "excellent": 2,
+          "hate": -2, "awful": -2, "terrible": -2, "horrible": -2, "worst": -2,
+        }
+
     # ---------------------------------------------------------------------
     # Preprocessing
     # ---------------------------------------------------------------------
@@ -66,11 +84,38 @@ class MoodAnalyzer:
           cleaned,
         )
 
+        # Normalize stretched-out words by collapsing any run of 3 or more
+        # identical characters down to 2 ("soooo" -> "soo", "yaaay" -> "yaay").
+        # This keeps emphatic spellings mapping to the same token while leaving
+        # naturally doubled letters (like "cool") intact. Emoticons and emojis
+        # are single tokens that won't match the word pattern, so they're safe.
+        word_pattern = re.compile(r"[a-z0-9]+(?:'[a-z0-9]+)?$")
+        tokens = [
+          re.sub(r"(.)\1{2,}", r"\1\1", token) if word_pattern.match(token) else token
+          for token in tokens
+        ]
+
         return tokens
 
     # ---------------------------------------------------------------------
     # Scoring logic
     # ---------------------------------------------------------------------
+
+    def _token_weight(self, token: str) -> int:
+        """
+        Return the signed sentiment weight of a single token.
+
+        Tokens listed in ``self.token_weights`` (strong words, emojis, slang)
+        use their custom weight. Otherwise a token in the positive/negative
+        word lists contributes the default +/-1. Everything else is 0.
+        """
+        if token in self.token_weights:
+          return self.token_weights[token]
+        if token in self.positive_words:
+          return 1
+        if token in self.negative_words:
+          return -1
+        return 0
 
     def score_text(self, text: str) -> int:
         """
@@ -79,12 +124,11 @@ class MoodAnalyzer:
         Positive words increase the score.
         Negative words decrease the score.
 
-        TODO: You must choose AT LEAST ONE modeling improvement to implement.
-        For example:
-          - Handle simple negation such as "not happy" or "not bad"
-          - Count how many times each word appears instead of just presence
-          - Give some words higher weights than others (for example "hate" < "annoyed")
-          - Treat emojis or slang (":)", "lol", "💀") as strong signals
+        Improvements implemented:
+          - Simple negation handling ("not happy", "not bad")
+          - Weighted sentiment: intense words count for more than mild ones
+          - Emojis and slang ("😂", ":)", "lol", "💀") act as strong signals
+          - Lightweight sarcasm heuristic for the dataset
         """
         tokens = self.preprocess(text)
         score = 0
@@ -108,22 +152,16 @@ class MoodAnalyzer:
         while index < len(tokens):
           token = tokens[index]
 
+          # If a negation precedes a sentiment token, flip that token's
+          # (weighted) contribution. "not amazing" -> -2, "not terrible" -> +2.
           if token in negation_words and index + 1 < len(tokens):
-            next_token = tokens[index + 1]
-            if next_token in self.positive_words:
-              score -= 1
-              index += 2
-              continue
-            if next_token in self.negative_words:
-              score += 1
+            next_weight = self._token_weight(tokens[index + 1])
+            if next_weight != 0:
+              score -= next_weight
               index += 2
               continue
 
-          if token in self.positive_words:
-            score += 1
-          elif token in self.negative_words:
-            score -= 1
-
+          score += self._token_weight(token)
           index += 1
 
         # Lightweight sarcasm heuristic (dataset-focused):
