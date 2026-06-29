@@ -59,6 +59,11 @@ SAMPLE_POSTS = [
     "I have no strong feelings one way or the other about this", 
     "I'm so tired but also kind of excited for tomorrow's event", 
     "Just got a promotion at work, but now I have to deal with more stress 😩",
+    "That moment when you realize you've been working on the wrong project for hours",
+    "Interesting how I can be both thrilled and anxious about starting a new job next week",
+    "I can't believe I just spilled coffee on my laptop, but at least it wasn't my phone",
+    "Feeling a mix of excitement and dread about the upcoming family reunion",
+    "I love how the weather is perfect for a walk, but I also hate that it means I have to leave my cozy bed",
 ]
 
 # Human labels for each post above.
@@ -82,6 +87,11 @@ TRUE_LABELS = [
     "neutral",   # "I have no strong feelings one way or the other about this"
     "mixed",     # "I'm so tired but also kind of excited for tomorrow's event"
     "mixed",     # "Just got a promotion at work, but now I have to deal with more stress 😩"
+    "negative",  # "That moment when you realize you've been working on the wrong project for hours"
+    "mixed",     # "Interesting how I can be both thrilled and anxious about starting a new job next week"
+    "mixed",  # "I can't believe I just spilled coffee on my laptop, but at least it wasn't my phone"
+    "mixed",     # "Feeling a mix of excitement and dread about the upcoming family reunion"
+    "mixed",     # "I love how the weather is perfect for a walk, but I also hate that it means I have to leave
 ]
 
 # TODO: Add 5-10 more posts and labels.
